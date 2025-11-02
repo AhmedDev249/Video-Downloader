@@ -2,3 +2,4 @@ core/cookies.txt
 venv/
 core/db.sqlite3
 core/downloads/
+Video-Downloader/venv
