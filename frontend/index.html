@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <title>🎬 محمّل فيديوهات يوتيوب</title>
+  <style>
+    body {
+      font-family: 'Tahoma', sans-serif;
+      background: #f4f6f8;
+      padding: 30px;
+      text-align: center;
+      direction: rtl;
+    }
+    input {
+      width: 60%;
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+    button {
+      padding: 10px 15px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin: 10px;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    select {
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 8px;
+    }
+    .video-info {
+      margin-top: 20px;
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      display: inline-block;
+      min-width: 350px;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>📥 تحميل فيديو من يوتيوب</h2>
+  <input type="text" id="url" placeholder="ضع رابط الفيديو هنا">
+  <button onclick="getVideoInfo()">عرض المعلومات</button>
+
+  <div id="info" class="video-info" style="display:none;">
+    <h3 id="title"></h3>
+    <p id="uploader"></p>
+    <p id="duration"></p>
+    <label>اختر الجودة:</label>
+    <br>
+    <select id="formats"></select>
+    <br>
+    <button onclick="downloadVideo()">تحميل الفيديو 🎬</button>
+  </div>
+
+  <script>
+    const API_BASE = "http://localhost:8000/api/youtube";  // غيّر هذا حسب موقع السيرفر
+
+    async function getVideoInfo() {
+      const url = document.getElementById("url").value.trim();
+      if (!url) return alert("الرجاء إدخال رابط الفيديو");
+
+      const res = await fetch(`${API_BASE}/info/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url })
+      });
+
+      const data = await res.json();
+      if (data.error) {
+        alert("حدث خطأ: " + data.error);
+        return;
+      }
+
+      document.getElementById("info").style.display = "block";
+      document.getElementById("title").innerText = "🎬 " + data.title;
+      document.getElementById("uploader").innerText = "📺 القناة: " + data.uploader;
+      document.getElementById("duration").innerText = "⏱️ المدة: " + data.duration + " ثانية";
+
+      const select = document.getElementById("formats");
+      select.innerHTML = "";
+      data.formats.forEach(f => {
+        const option = document.createElement("option");
+        option.value = f.format_id;
+        option.text = `${f.height}p (${f.ext})`;
+        select.appendChild(option);
+      });
+    }
+
+    async function downloadVideo() {
+      const url = document.getElementById("url").value.trim();
+      const format_id = document.getElementById("formats").value;
+
+      const res = await fetch(`${API_BASE}/download/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url, format_id })
+      });
+
+      const data = await res.json();
+      if (data.error) {
+        alert("حدث خطأ أثناء التحميل: " + data.error);
+        return;
+      }
+
+      // فتح رابط التحميل
+      window.location.href = data.file_url;
+    }
+  </script>
+
+</body>
+</html>
