@@ -7,7 +7,7 @@ import yt_dlp
 import os
 
 DOWNLOAD_PATH = os.path.join(settings.BASE_DIR, "downloads")
-COOKIES_PATH = os.path.join(settings.BASE_DIR, "core", "cookies.txt")
+COOKIES_PATH = os.path.join(settings.BASE_DIR, "cookies.txt")
 
 os.makedirs(DOWNLOAD_PATH, exist_ok=True)
 
